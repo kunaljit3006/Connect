@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Connect</string>
+    <string name="start_video_call" />
+    <string name="contact_profile_image_desc" />
+</resources>

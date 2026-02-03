@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="textUserName" type="id" />
+    <item name="textStatus" type="id" />
+    <item name="imageCall" type="id" />
+    <item name="imageProfile" type="id" />
+</resources>

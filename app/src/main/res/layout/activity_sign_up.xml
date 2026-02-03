@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/sign_up_screen"
+    tools:context=".SignUp">
+
+    <!-- Lottie Animation -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieAnimationView2"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/signup" />
+
+    <!-- Sign Up Image -->
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="132dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lottieAnimationView2"
+        app:srcCompat="@drawable/sign_up" />
+
+    <!-- Form Fields -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Username -->
+        <ImageView
+            android:layout_width="130dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/enterusername"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/usernameLayout"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="1dp"
+            app:boxStrokeColor="#FFDD00"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#000000"
+            android:elevation="6dp"
+            android:hint="Enter your username">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Email -->
+        <ImageView
+            android:layout_width="130dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/textemail"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailLayout"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="1dp"
+            android:hint="Enter your email"
+            app:boxStrokeColor="#FFDD00"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#000000"
+            android:elevation="6dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextTextEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password -->
+        <ImageView
+            android:layout_width="130dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/textpassword"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordLayout"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="1dp"
+            android:hint="Enter your password"
+            app:endIconMode="password_toggle"
+            app:endIconTint="#000000"
+            app:boxStrokeColor="#FFDD00"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#000000"
+            android:elevation="6dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextTextPassword2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Confirm Password -->
+        <ImageView
+            android:layout_width="130dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/confirmpassword"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordLayout2"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="1dp"
+            android:hint="Confirm your password"
+            app:endIconMode="password_toggle"
+            app:endIconTint="#000000"
+            app:boxStrokeColor="#FFDD00"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#000000"
+            android:elevation="6dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextTextPassword3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Login Button -->
+        <ImageView
+            android:id="@+id/button"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            app:srcCompat="@drawable/sign_up_button" />
+
+        <!-- Already have an account? -->
+        <TextView
+            android:id="@+id/tvAlreadyAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            android:text="Already have an account? Sign in"
+            android:textColor="#100F03"
+            android:textSize="15sp"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
