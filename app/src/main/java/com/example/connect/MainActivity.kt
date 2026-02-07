@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     private var headerListener: ListenerRegistration? = null
 
     private val DUMMY_PROFILE_URL =
-        "https://randomuser.me/api/portraits/men/32.jpg"
+        "https://drive.google.com/uc?export=view&id=1Uy0Do0ASVDWjriEZbeVWsPBv_ToXrjE-"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,10 +128,10 @@ class MainActivity : AppCompatActivity() {
                     showDeleteAccountDialog()
                 }
                 R.id.nav_report_bug->{
-
+                    openReportAbug()
                 }
                 R.id.nav_about_developer->{
-
+                    openAboutDeveloper()
                 }
 
             }
@@ -230,6 +230,15 @@ class MainActivity : AppCompatActivity() {
         )
         item.title = title
     }
+    private fun openAboutDeveloper() {
+        val intent = Intent(this, AboutTheDevloperActivity::class.java)
+        startActivity(intent)
+    }
+    private  fun  openReportAbug(){
+        val intent= Intent(this, ReportABugActivity::class.java)
+        startActivity(intent)
+    }
+
 
     private fun showLogoutDialog() {
         val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
@@ -316,3 +325,5 @@ class MainActivity : AppCompatActivity() {
 
 
 }
+
+

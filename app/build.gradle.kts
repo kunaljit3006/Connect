@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    id("kotlin-kapt")
 }
 
 android {
@@ -58,9 +59,17 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation ("com.google.android.material:material:1.11.0")
+
 
     // WebRTC
     implementation("com.mesibo.api:webrtc:1.0.5")
+    // OkHttp (required for Instagram fetch)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+// Glide compiler (required because you use Glide)
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+
 }
 
 

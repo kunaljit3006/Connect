@@ -15,8 +15,12 @@
         android:theme="@style/Theme.Connect"
         tools:targetApi="31">
         <activity
-            android:name=".AboutTheDevActivity"
+            android:name=".ReportABugActivity"
             android:exported="false" />
+        <activity
+            android:name=".AboutTheDevloperActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false" />
