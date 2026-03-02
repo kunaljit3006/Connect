@@ -11,7 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.connect.databinding.ActivitySignInBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+
 
 class SignIn : AppCompatActivity() {
 
@@ -93,22 +93,19 @@ class SignIn : AppCompatActivity() {
     private fun saveUserToFirestore() {
         val user = auth.currentUser ?: return
 
-        val userMap = hashMapOf(
-            "uid" to user.uid,
-            "email" to user.email,
-            "username" to "kunaljit kashyap",
-            "profileUrl" to ""
+        // Only update status on login — never overwrite username or other existing fields
+        val statusUpdate = hashMapOf<String, Any>(
+            "status" to "Online"
         )
 
         db.collection("users")
             .document(user.uid)
-            .set(userMap, SetOptions.merge())
+            .update(statusUpdate)
             .addOnSuccessListener {
                 navigateToMain()
             }
             .addOnFailureListener {
-                binding.imageView2.isEnabled = true
-                Toast.makeText(this, "Login successful, but data sync failed", Toast.LENGTH_SHORT).show()
+                // Even if status update fails, still navigate to main
                 navigateToMain()
             }
     }

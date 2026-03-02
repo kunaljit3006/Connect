@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestore
 
-class SignUp :  AppCompatActivity(){
+class SignUp : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignUpBinding
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
@@ -72,21 +72,10 @@ class SignUp :  AppCompatActivity(){
             return
         } else binding.passwordLayout2.error = null
 
-        // ---------- CHECK USERNAME UNIQUENESS ----------
-        db.collection("users")
-            .whereEqualTo("username", username)
-            .limit(1)
-            .get()
-            .addOnSuccessListener { docs ->
-                if (!docs.isEmpty) {
-                    binding.usernameLayout.error = "Username already taken"
-                } else {
-                    createUser(email, password, username)
-                }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
-            }
+        binding.button.isEnabled = false
+
+        // Create Auth account first — user is then authenticated for the Firestore query
+        createUser(email, password, username)
     }
 
     private fun createUser(email: String, password: String, username: String) {
@@ -97,39 +86,30 @@ class SignUp :  AppCompatActivity(){
                 val user = result.user ?: return@addOnSuccessListener
                 val uid = user.uid
 
-                // Firestore document ID = UID (CORRECT)
-                val userMap = hashMapOf(
-                    "uid" to uid,
-                    "username" to username,
-                    "email" to email,
-                    "status" to "Offline",
-                    "profileUrl" to ""
-                )
-
+                // Now authenticated — safe to query Firestore for username uniqueness
                 db.collection("users")
-                    .document(uid)
-                    .set(userMap)
-                    .addOnSuccessListener {
-
-                        Toast.makeText(
-                            this,
-                            "Account created successfully. Please sign in.",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                        // Sign out after signup (correct for your flow)
-                        auth.signOut()
-                        goToSignIn()
+                    .whereEqualTo("username", username)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener { docs ->
+                        if (!docs.isEmpty) {
+                            // Username taken — delete the just-created Auth account to keep things clean
+                            user.delete()
+                            binding.usernameLayout.error = "Username already taken"
+                            binding.button.isEnabled = true
+                        } else {
+                            saveUserToFirestore(uid, email, username)
+                        }
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(
-                            this,
-                            "Failed to save user data",
-                            Toast.LENGTH_LONG
-                        ).show()
+                    .addOnFailureListener { e ->
+                        // Firestore check failed — clean up Auth account
+                        user.delete()
+                        binding.button.isEnabled = true
+                        Toast.makeText(this, "Sign up failed: ${e.message}", Toast.LENGTH_LONG).show()
                     }
             }
             .addOnFailureListener { e ->
+                binding.button.isEnabled = true
                 if (e is FirebaseAuthUserCollisionException) {
                     Toast.makeText(
                         this,
@@ -140,6 +120,38 @@ class SignUp :  AppCompatActivity(){
                 } else {
                     Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
                 }
+            }
+    }
+
+    private fun saveUserToFirestore(uid: String, email: String, username: String) {
+        val userMap = hashMapOf(
+            "uid" to uid,
+            "username" to username,
+            "email" to email,
+            "status" to "Offline",
+            "profileUrl" to ""
+        )
+
+        db.collection("users")
+            .document(uid)
+            .set(userMap)
+            .addOnSuccessListener {
+                Toast.makeText(
+                    this,
+                    "Account created successfully. Please sign in.",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                auth.signOut()
+                goToSignIn()
+            }
+            .addOnFailureListener {
+                Toast.makeText(
+                    this,
+                    "Failed to save user data",
+                    Toast.LENGTH_LONG
+                ).show()
+                binding.button.isEnabled = true
             }
     }
 

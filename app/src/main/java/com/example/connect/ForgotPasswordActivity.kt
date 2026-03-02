@@ -1,6 +1,7 @@
 package com.example.connect
 
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -37,6 +38,9 @@ class ForgotPasswordActivity : AppCompatActivity() {
         // Validation
         if (email.isEmpty()) {
             binding.emailLayout.error = "Email is required"
+            return
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.emailLayout.error = "Enter a valid email address"
             return
         } else {
             binding.emailLayout.error = null

@@ -177,17 +177,25 @@ class MainActivity : AppCompatActivity() {
      * Fetch all users (works independently of header)
      */
     private fun fetchUsersFromFirestore() {
+        val currentUid = auth.currentUser?.uid
+
         db.collection("users")
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
 
                 val tempList = ArrayList<User>()
                 for (doc in snapshot.documents) {
+                    // Bug fix: exclude the currently logged-in user from the contacts list
+                    if (doc.id == currentUid) continue
+
+                    val rawUrl = doc.getString("profileUrl")
                     tempList.add(
                         User(
+                            uid = doc.id,
                             name = doc.getString("username") ?: "Unknown",
                             status = doc.getString("status") ?: "Offline",
-                            profileUrl = DUMMY_PROFILE_URL
+                            // Bug fix: use real profileUrl from Firestore, fall back to dummy if empty
+                            profileUrl = if (!rawUrl.isNullOrEmpty()) rawUrl else DUMMY_PROFILE_URL
                         )
                     )
                 }
@@ -262,11 +270,25 @@ class MainActivity : AppCompatActivity() {
         headerListener?.remove()
         headerListener = null
 
-        auth.signOut()
+        val uid = auth.currentUser?.uid
 
-        val intent = Intent(this, SignIn::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
+        // Set Offline BEFORE signing out — after signOut(), currentUser becomes null
+        if (uid != null) {
+            db.collection("users").document(uid)
+                .update("status", "Offline")
+                .addOnCompleteListener {
+                    // Sign out and navigate only after status is updated
+                    auth.signOut()
+                    val intent = Intent(this, SignIn::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }
+        } else {
+            auth.signOut()
+            val intent = Intent(this, SignIn::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
     }
 
     private fun showDeleteAccountDialog() {
@@ -307,19 +329,28 @@ class MainActivity : AppCompatActivity() {
                 // 2️ Delete Firebase Auth account
                 user.delete()
                     .addOnSuccessListener {
-
                         // 3️ Go to SignUp (clear back stack)
                         val intent = Intent(this, SignUp::class.java)
                         intent.flags =
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
                     }
-                    .addOnFailureListener {
-                        // Usually happens if re-authentication is required
+                    .addOnFailureListener { e ->
+                        // Firebase requires recent login before deleting account
+                        // Show a clear message so the user knows what to do
+                        android.widget.Toast.makeText(
+                            this,
+                            "For security, please sign out and sign in again, then try deleting your account.",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
                     }
             }
-            .addOnFailureListener {
-                // Firestore delete failed
+            .addOnFailureListener { e ->
+                android.widget.Toast.makeText(
+                    this,
+                    "Failed to delete account data. Please try again.",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
             }
     }
 
