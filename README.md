@@ -9,9 +9,9 @@
 ### 🔐 Authentication
 
 <p align="center">
-  <img src="signin.jpeg" width="30%" />
-  <img src="signup.jpeg" width="30%" />
-  <img src="forgot_password.jpeg" width="30%" />
+  <img src="screenshots/signin.png" width="30%" />
+  <img src="screenshots/signup.png" width="30%" />
+  <img src="screenshots/forgot_password.png" width="30%" />
 </p>
 
 - Secure Firebase authentication  
@@ -24,8 +24,8 @@
 ### 🏠 Main Interface
 
 <p align="center">
-  <img src="drawer.jpeg" width="30%" />
-  <img src="profile.jpeg" width="30%" />
+  <img src="screenshots/drawer.png" width="30%" />
+  <img src="screenshots/profile.png" width="30%" />
 </p>
 
 - Real-time user status (Online/Offline)  
@@ -92,6 +92,7 @@
 ---
 
 ## 📂 Project Structure
+```text
 Connect/
 ├── app/
 │ ├── adapter/
@@ -104,8 +105,8 @@ Connect/
 │ ├── drawable/
 │ └── values/
 ├── build.gradle.kts
-└── settings.gradle.kts
-
+└── settings.gradle.kts 
+```
 ---
 
 ## 🚀 Getting Started
@@ -123,38 +124,51 @@ Connect/
 1. Clone the repository:
 ```bash
 git clone https://github.com/kunaljit3006/Connect.git
-Firebase setup:
-Create project in Firebase Console
-Add Android app
-Download google-services.json
-Place it inside /app
-Enable:
-Email/Password Authentication
-Firestore Database
-Run the app
-📊 Future Improvements
-Voice Calls
-Push Notifications (FCM)
-Media Sharing
-Multi-language Support
-AI-based Features
-🤝 Contributing
+```
+
+2. Firebase setup:
+- Create project in Firebase Console
+- Add Android app
+- Download google-services.json
+- Place it inside /app
+- Enable:
+  - Email/Password Authentication
+  - Firestore Database
+
+3. Run the app
+
+---
+
+## 📊 Future Improvements
+- Voice Calls
+- Push Notifications (FCM)
+- Media Sharing
+- Multi-language Support
+- AI-based Features
+
+---
+
+## 🤝 Contributing
 1. Fork the repo
 2. Create a branch
 3. Make changes
 4. Push
 5. Open Pull Request
-📧 Contact
 
-Developer: Kunaljit Kashyap
-📩 Email: kkunaljit@gmail.com
+---
 
-🔗 GitHub: https://github.com/kunaljit3006
+## 📧 Contact
 
-🔗 LinkedIn: https://linkedin.com/in/kunaljit-kashyap-8bb212287
+**Developer**: Kunaljit Kashyap  
+📩 **Email**: kkunaljit@gmail.com  
 
-📄 License
+🔗 **GitHub**: [kunaljit3006](https://github.com/kunaljit3006)  
+🔗 **LinkedIn**: [Kunaljit Kashyap](https://linkedin.com/in/kunaljit-kashyap-8bb212287)  
 
-MIT License
+---
 
-<p align="center"> Made with ❤️ by Kunaljit Kashyap </p> ```
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<p align="center"> Made with ❤️ by Kunaljit Kashyap </p>
