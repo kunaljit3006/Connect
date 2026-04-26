@@ -2,6 +2,19 @@
 
 ![Connect Banner](connect_app_banner_1777209750427.png)
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/signin.png" width="30%" />
+  <img src="screenshots/signup.png" width="30%" />
+  <img src="screenshots/forgot_password.png" width="30%" />
+</p>
+
+<p align="center">
+  <img src="screenshots/drawer.png" width="30%" />
+  <img src="screenshots/profile.png" width="30%" />
+</p>
+
 Connect is a premium, state-of-the-art Android application designed to bridge distances. Built with Kotlin and powered by WebRTC, it offers seamless real-time video calling, screen sharing, and a robust social networking experience.
 
 ---
@@ -94,7 +107,7 @@ Contributions are what make the open-source community such an amazing place to l
 
 ## 📧 Contact
 
-**Developer**: [Your Name/Handle]  
+**Developer**:Kunaljit Kashyap
 **Project Link**: [https://github.com/your-username/Connect](https://github.com/your-username/Connect)
 
 ---
