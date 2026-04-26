@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base palette -->
     <color name="black">#FF000000</color>
-    <color name="yellow">#FFDD00</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="secondary_colour">#FFF2F0</color>
+    <color name="yellow">#FFDD00</color>
+
+    <!-- Theme colors (light mode values) -->
+    <color name="colorPrimary">#FFDD00</color>
+    <color name="colorOnPrimary">#000000</color>
+    <color name="colorSecondary">#FFF2F0</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorSurfaceVariant">#F5F5F5</color>
+    <color name="colorOnSurfaceVariant">#666666</color>
+    <color name="colorOutline">#E0E0E0</color>
+
+    <color name="colorDialogButton">#000000</color>
+    <color name="faded_black">#80000000</color>
 </resources>

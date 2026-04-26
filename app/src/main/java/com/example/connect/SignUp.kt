@@ -26,12 +26,20 @@ class SignUp : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
+            
+            // Do NOT apply top padding to root so background draws under status bar
+            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom)
+
+            // Shift animation down below status bar
+            val lottieLp = binding.lottieAnimationView2.layoutParams as android.view.ViewGroup.MarginLayoutParams
+            lottieLp.topMargin = (16 * resources.displayMetrics.density).toInt() + systemBars.top
+            binding.lottieAnimationView2.layoutParams = lottieLp
+            
+            // Expand yellow background height (280dp in SignUp)
+            val bgLp = binding.topBackground.layoutParams
+            bgLp.height = (280 * resources.displayMetrics.density).toInt() + systemBars.top
+            binding.topBackground.layoutParams = bgLp
+
             insets
         }
 

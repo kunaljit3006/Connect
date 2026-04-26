@@ -8,9 +8,9 @@
     app:cardCornerRadius="14dp"
     app:cardElevation="4dp"
     app:cardUseCompatPadding="true"
-    app:strokeColor="?attr/colorOutline"
+    app:strokeColor="@color/colorOutline"
     app:strokeWidth="1dp"
-    app:cardBackgroundColor="?attr/colorSurface"
+    app:cardBackgroundColor="@color/colorSurface"
     android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
@@ -28,8 +28,8 @@
             android:layout_height="55dp"
              android:src="@drawable/user"
             app:civ_border_width="2dp"
-            app:civ_border_color="?attr/colorOutline"
-            app:civ_circle_background_color="@android:color/white"
+            app:civ_border_color="@color/colorOutline"
+            app:civ_circle_background_color="@color/colorSurfaceVariant"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
@@ -41,12 +41,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Sarah Mitchell"
-            android:textColor="?attr/colorOnSurface"
+            android:textColor="@color/colorOnSurface"
             android:textStyle="bold"
             android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@id/imageProfile"
             app:layout_constraintTop_toTopOf="@id/imageProfile"
-            app:layout_constraintEnd_toStartOf="@id/imageCall"
+            app:layout_constraintEnd_toStartOf="@id/actionContainer"
             android:ellipsize="end"
             android:maxLines="1" />
 
@@ -62,18 +62,48 @@
             app:layout_constraintTop_toBottomOf="@id/textUserName"
             app:layout_constraintBottom_toBottomOf="@id/imageProfile" />
 
-        <!-- Video Call Icon -->
-        <ImageView
-            android:id="@+id/imageCall"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/call_icon"
-            android:background="@drawable/call_button_bg"
-            android:padding="8dp"
+        <!-- Action Container -->
+        <FrameLayout
+            android:id="@+id/actionContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Video Call Icon -->
+            <ImageView
+                android:id="@+id/btnCall"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/call_icon_vector"
+                android:background="@drawable/call_button_bg"
+                android:padding="8dp"
+                android:visibility="gone"/>
+
+            <!-- Add Friend Button -->
+            <ImageView
+                android:id="@+id/btnAddFriend"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_person_add_vector"
+                android:background="@drawable/call_button_bg"
+                android:padding="8dp"
+                android:visibility="gone"/>
+
+            <!-- Sent State -->
+            <TextView
+                android:id="@+id/tvRequested"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="Requested"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                android:textColor="@color/colorOnSurfaceVariant"
+                android:visibility="gone"/>
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

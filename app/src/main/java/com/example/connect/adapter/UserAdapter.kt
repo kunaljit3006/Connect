@@ -8,9 +8,17 @@ import com.bumptech.glide.Glide
 import com.example.connect.R
 import com.example.connect.databinding.ItemUserBinding
 import com.example.connect.model.User
+import android.view.View
+
+interface UserActionCallback {
+    fun onAddFriendClicked(user: User)
+    fun onCallClicked(user: User)
+    fun onUserLongClicked(user: User)
+}
 
 class UserAdapter(
-    private val userList: ArrayList<User>
+    private val userList: ArrayList<User>,
+    private val callback: UserActionCallback
 ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     private val filteredList: ArrayList<User> = ArrayList()
@@ -48,6 +56,47 @@ class UserAdapter(
                 .placeholder(R.drawable.user)
                 .error(R.drawable.user)
                 .into(imageProfile)
+
+            // Setup Friend Request UI State
+            when (user.friendStatus) {
+                "friends" -> {
+                    btnCall.visibility = View.VISIBLE
+                    btnAddFriend.visibility = View.GONE
+                    tvRequested.visibility = View.GONE
+                }
+                "sent" -> {
+                    btnCall.visibility = View.GONE
+                    btnAddFriend.visibility = View.GONE
+                    tvRequested.visibility = View.VISIBLE
+                    tvRequested.text = "Pending"
+                }
+                "received" -> {
+                    btnCall.visibility = View.GONE
+                    btnAddFriend.visibility = View.GONE
+                    tvRequested.visibility = View.VISIBLE
+                    tvRequested.text = "Pending"
+                }
+                "blocked_by_me" -> {
+                    btnCall.visibility = View.GONE
+                    btnAddFriend.visibility = View.GONE
+                    tvRequested.visibility = View.VISIBLE
+                    tvRequested.text = "Blocked"
+                    tvRequested.setTextColor(androidx.core.content.ContextCompat.getColor(root.context, android.R.color.holo_red_dark))
+                }
+                else -> { // "none"
+                    btnCall.visibility = View.GONE
+                    btnAddFriend.visibility = View.VISIBLE
+                    tvRequested.visibility = View.GONE
+                }
+            }
+
+            // Click Listeners
+            btnAddFriend.setOnClickListener { callback.onAddFriendClicked(user) }
+            btnCall.setOnClickListener { callback.onCallClicked(user) }
+            root.setOnLongClickListener {
+                callback.onUserLongClicked(user)
+                true
+            }
         }
     }
 

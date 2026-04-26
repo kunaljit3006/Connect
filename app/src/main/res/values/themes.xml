@@ -2,10 +2,22 @@
 
     <style name="Theme.Connect" parent="Theme.Material3.DayNight.NoActionBar">
 
-        <!-- Material surface colors (light) -->
-        <item name="colorSurface">#FFFFFF</item>
-        <item name="colorOnSurface">#000000</item>
-        <item name="colorOutline">#E0E0E0</item>
+        <!-- Primary (yellow toolbar / buttons) -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+
+        <!-- Secondary (content background) -->
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+
+        <!-- Surface (cards, inputs, drawers) -->
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        <item name="colorSurfaceVariant">@color/colorSurfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/colorOnSurfaceVariant</item>
+
+        <!-- Outline -->
+        <item name="colorOutline">@color/colorOutline</item>
 
         <!-- System bars -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -22,6 +34,13 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
+        <!-- Custom dialog theme for black text in light mode -->
+        <item name="materialAlertDialogTheme">@style/Theme.Connect.AlertDialog</item>
+
+    </style>
+
+    <style name="Theme.Connect.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/colorDialogButton</item>
     </style>
 
 </resources>

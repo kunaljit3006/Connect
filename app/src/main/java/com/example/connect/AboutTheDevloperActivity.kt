@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.bumptech.glide.Glide
 import com.example.connect.databinding.ActivityAboutTheDevloperBinding
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class AboutTheDevloperActivity : AppCompatActivity() {
 
@@ -21,6 +23,22 @@ class AboutTheDevloperActivity : AppCompatActivity() {
         // ViewBinding
         binding = ActivityAboutTheDevloperBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        val mainView = findViewById<android.view.View>(R.id.main)
+        ViewCompat.setOnApplyWindowInsetsListener(mainView) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            
+            // Pad sides and bottom only
+            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom)
+            
+            // Pad header top so content moves below camera cutout
+            val header = findViewById<android.view.View>(R.id.headerLayout)
+            val density = resources.displayMetrics.density
+            val pad16 = (16 * density).toInt()
+            header.setPadding(pad16, systemBars.top + pad16, pad16, pad16)
+            
+            insets
+        }
 
         // Back button
         binding.btnBack.setOnClickListener {

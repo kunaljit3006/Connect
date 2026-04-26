@@ -41,6 +41,10 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -67,9 +71,13 @@ dependencies {
     // OkHttp (required for Instagram fetch)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-// Glide compiler (required because you use Glide)
+    // Glide compiler (required because you use Glide)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
+    // Testing
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
 
 

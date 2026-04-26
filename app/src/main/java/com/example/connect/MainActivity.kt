@@ -11,12 +11,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.connect.adapter.UserAdapter
+import com.example.connect.adapter.UserActionCallback
 import com.example.connect.databinding.ActivityMainBinding
 import com.example.connect.databinding.NavHeaderBinding
 import com.example.connect.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.FieldValue
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import android.view.LayoutInflater
+import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,9 +34,12 @@ class MainActivity : AppCompatActivity() {
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     private var headerListener: ListenerRegistration? = null
+    private var usersListener: ListenerRegistration? = null
+    private var friendshipsListener: ListenerRegistration? = null
+    private var incomingCallListener: ListenerRegistration? = null
 
-    private val DUMMY_PROFILE_URL =
-        "https://drive.google.com/uc?export=view&id=1Uy0Do0ASVDWjriEZbeVWsPBv_ToXrjE-"
+    private var rawUsers = ArrayList<User>()
+    private var friendshipMap = mutableMapOf<String, Triple<String, String, Long>>() // uid -> (docId, status, lastInteraction)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +62,11 @@ class MainActivity : AppCompatActivity() {
         forceDeleteTextRed()
         setupRecyclerView()
         setupSearchBar()
+        listenForIncomingCalls()
+        
+        binding.btnFriendRequests.setOnClickListener {
+            startActivity(Intent(this, FriendRequestsActivity::class.java))
+        }
     }
 
     /**
@@ -75,6 +88,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         loadCurrentUserIntoHeader()
+
+        headerBinding.root.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }
     }
 
     /**
@@ -101,7 +119,7 @@ class MainActivity : AppCompatActivity() {
                 val profileUrl = document.getString("profileUrl")
 
                 Glide.with(this)
-                    .load(if (!profileUrl.isNullOrEmpty()) profileUrl else DUMMY_PROFILE_URL)
+                    .load(profileUrl.takeIf { !it.isNullOrEmpty() })
                     .placeholder(R.drawable.user)
                     .into(headerBinding.profileImage)
             }
@@ -118,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         binding.navigationView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_profile -> {
-                    // Open profile screen later
+                    startActivity(Intent(this@MainActivity, ProfileActivity::class.java))
                 }
                 R.id.nav_logout -> {
                     showLogoutDialog()
@@ -162,7 +180,23 @@ class MainActivity : AppCompatActivity() {
      * RecyclerView setup
      */
     private fun setupRecyclerView() {
-        adapter = UserAdapter(userList)
+        adapter = UserAdapter(userList, object : UserActionCallback {
+            override fun onAddFriendClicked(user: User) {
+                sendFriendRequest(user.uid)
+            }
+
+            override fun onCallClicked(user: User) {
+                if (user.friendStatus != "friends") {
+                    android.widget.Toast.makeText(this@MainActivity, "You can only call your friends.", android.widget.Toast.LENGTH_SHORT).show()
+                    return
+                }
+                initiateCall(user)
+            }
+
+            override fun onUserLongClicked(user: User) {
+                showUserOptionsBottomSheet(user)
+            }
+        })
 
         binding.recyclerContacts.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -177,15 +211,14 @@ class MainActivity : AppCompatActivity() {
      * Fetch all users (works independently of header)
      */
     private fun fetchUsersFromFirestore() {
-        val currentUid = auth.currentUser?.uid
+        val currentUid = auth.currentUser?.uid ?: return
 
-        db.collection("users")
+        usersListener = db.collection("users")
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
 
                 val tempList = ArrayList<User>()
                 for (doc in snapshot.documents) {
-                    // Bug fix: exclude the currently logged-in user from the contacts list
                     if (doc.id == currentUid) continue
 
                     val rawUrl = doc.getString("profileUrl")
@@ -194,13 +227,193 @@ class MainActivity : AppCompatActivity() {
                             uid = doc.id,
                             name = doc.getString("username") ?: "Unknown",
                             status = doc.getString("status") ?: "Offline",
-                            // Bug fix: use real profileUrl from Firestore, fall back to dummy if empty
-                            profileUrl = if (!rawUrl.isNullOrEmpty()) rawUrl else DUMMY_PROFILE_URL
+                            profileUrl = rawUrl ?: ""
                         )
                     )
                 }
-                adapter.updateList(tempList)
+                rawUsers = tempList
+                mergeAndDisplayUsers()
             }
+
+        friendshipsListener = db.collection("friendships")
+            .whereArrayContains("users", currentUid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+
+                var pendingCount = 0
+                val newMap = mutableMapOf<String, Triple<String, String, Long>>()
+                for (doc in snapshot.documents) {
+                    val usersArr = doc.get("users") as? List<String>
+                    if (usersArr == null || usersArr.size != 2) continue
+                    
+                    val otherUid = usersArr.firstOrNull { it != currentUid } ?: continue
+                    val senderId = doc.getString("senderId") ?: ""
+                    val status = doc.getString("status") ?: "pending"
+                    val lastInteraction = doc.getLong("lastInteraction") ?: 0L
+
+                    if (status == "pending" && senderId != currentUid) {
+                        pendingCount++
+                    }
+
+                    val uiStatus = when (status) {
+                        "accepted" -> "friends"
+                        "blocked" -> if (senderId == currentUid) "blocked_by_me" else "blocked_by_them"
+                        else -> if (senderId == currentUid) "sent" else "received"
+                    }
+
+                    newMap[otherUid] = Triple(doc.id, uiStatus, lastInteraction)
+                }
+                friendshipMap = newMap
+                mergeAndDisplayUsers()
+                updateFriendRequestBadge(pendingCount)
+            }
+    }
+
+    private fun mergeAndDisplayUsers() {
+        val mergedList = rawUsers.mapNotNull { user ->
+            val friendData = friendshipMap[user.uid]
+            val fStatus = friendData?.second ?: "none"
+            
+            // Only show users if they haven't blocked current user
+            if (fStatus == "blocked_by_them") {
+                null
+            } else {
+                user.copy(
+                    friendStatus = fStatus,
+                    friendshipDocId = friendData?.first,
+                    lastInteraction = friendData?.third ?: 0L
+                )
+            }
+        }.sortedByDescending { it.lastInteraction }
+        
+        adapter.updateList(mergedList)
+    }
+
+    private fun updateFriendRequestBadge(count: Int) {
+        val badge = findViewById<TextView>(R.id.tvFriendRequestBadge) ?: return
+        if (count > 0) {
+            badge.visibility = android.view.View.VISIBLE
+            badge.text = if (count > 99) "99+" else count.toString()
+        } else {
+            badge.visibility = android.view.View.GONE
+        }
+    }
+
+    private fun getFriendshipDocId(uid1: String, uid2: String): String {
+        return if (uid1 < uid2) "${uid1}_${uid2}" else "${uid2}_${uid1}"
+    }
+
+    private fun sendFriendRequest(otherUid: String) {
+        val currentUid = auth.currentUser?.uid ?: return
+        val docId = getFriendshipDocId(currentUid, otherUid)
+
+        val friendshipData = hashMapOf(
+            "users" to listOf(currentUid, otherUid),
+            "senderId" to currentUid,
+            "status" to "pending",
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+        db.collection("friendships").document(docId).set(friendshipData)
+            .addOnSuccessListener {
+                android.widget.Toast.makeText(this, "Friend request sent!", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                android.widget.Toast.makeText(this, "Failed to send: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private fun showUserOptionsBottomSheet(user: User) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view = LayoutInflater.from(this).inflate(R.layout.layout_bottom_sheet_user_actions, null)
+        bottomSheetDialog.setContentView(view)
+
+        val tvUsername = view.findViewById<TextView>(R.id.tvSheetUsername)
+        val tvUnfriend = view.findViewById<TextView>(R.id.tvUnfriend)
+        val tvBlock = view.findViewById<TextView>(R.id.tvBlock)
+        val tvUnblock = view.findViewById<TextView>(R.id.tvUnblock)
+
+        tvUsername.text = user.name
+
+        // Show/Hide options based on friendship status
+        if (user.friendStatus == "friends") {
+            tvUnfriend.visibility = android.view.View.VISIBLE
+        } else {
+            tvUnfriend.visibility = android.view.View.GONE
+        }
+
+        if (user.friendStatus == "blocked_by_me") {
+            tvBlock.visibility = android.view.View.GONE
+            tvUnblock.visibility = android.view.View.VISIBLE
+        } else {
+            tvBlock.visibility = android.view.View.VISIBLE
+            tvUnblock.visibility = android.view.View.GONE
+        }
+
+        tvUnfriend.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            showConfirmDialog("Unfriend", "Are you sure you want to unfriend ${user.name}?") {
+                unfriendUser(user)
+            }
+        }
+
+        tvBlock.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            showConfirmDialog("Block User", "Are you sure you want to block ${user.name}? They won't be able to find you.", isDestructive = true) {
+                blockUser(user)
+            }
+        }
+
+        tvUnblock.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            showConfirmDialog("Unblock User", "Are you sure you want to unblock ${user.name}?") {
+                unblockUser(user)
+            }
+        }
+
+        bottomSheetDialog.show()
+    }
+
+    private fun showConfirmDialog(title: String, message: String, isDestructive: Boolean = false, onConfirm: () -> Unit) {
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setCancelable(true)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Confirm") { _, _ -> onConfirm() }
+            .create()
+
+        dialog.show()
+
+        if (isDestructive) {
+            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
+                ?.setTextColor(getColor(android.R.color.holo_red_dark))
+        }
+    }
+
+    private fun unfriendUser(user: User) {
+        val docId = user.friendshipDocId ?: getFriendshipDocId(auth.currentUser?.uid ?: return, user.uid)
+        db.collection("friendships").document(docId).delete()
+            .addOnSuccessListener { android.widget.Toast.makeText(this, "Unfriended ${user.name}", android.widget.Toast.LENGTH_SHORT).show() }
+    }
+
+    private fun blockUser(user: User) {
+        val currentUid = auth.currentUser?.uid ?: return
+        val docId = getFriendshipDocId(currentUid, user.uid)
+
+        val blockData = hashMapOf(
+            "users" to listOf(currentUid, user.uid),
+            "senderId" to currentUid,
+            "status" to "blocked",
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+        db.collection("friendships").document(docId).set(blockData)
+            .addOnSuccessListener { android.widget.Toast.makeText(this, "Blocked ${user.name}", android.widget.Toast.LENGTH_SHORT).show() }
+    }
+
+    private fun unblockUser(user: User) {
+        val docId = user.friendshipDocId ?: return
+        db.collection("friendships").document(docId).delete()
+            .addOnSuccessListener { android.widget.Toast.makeText(this, "Unblocked ${user.name}", android.widget.Toast.LENGTH_SHORT).show() }
     }
 
     /**
@@ -223,6 +436,9 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         headerListener?.remove()
+        usersListener?.remove()
+        friendshipsListener?.remove()
+        incomingCallListener?.remove()
     }
 
     private fun forceDeleteTextRed() {
@@ -238,6 +454,72 @@ class MainActivity : AppCompatActivity() {
         )
         item.title = title
     }
+
+    private fun listenForIncomingCalls() {
+        val currentUid = auth.currentUser?.uid ?: return
+        incomingCallListener = db.collection("calls")
+            .whereEqualTo("receiverId", currentUid)
+            .whereEqualTo("status", "dialing")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                for (doc in snapshot.documentChanges) {
+                    if (doc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                        val callId = doc.document.id
+                        val callerId = doc.document.getString("callerId") ?: continue
+                        val timestamp = doc.document.getLong("timestamp") ?: System.currentTimeMillis()
+                        
+                        // Ignore calls older than 60 seconds
+                        if (System.currentTimeMillis() - timestamp > 60000) {
+                            db.collection("calls").document(callId).update("status", "ended")
+                            continue
+                        }
+                        
+                        val callerUser = rawUsers.find { it.uid == callerId }
+                        val callerName = callerUser?.name ?: "Incoming Call"
+                        val callerProfileUrl = callerUser?.profileUrl ?: ""
+
+                        val intent = Intent(this, IncomingCallActivity::class.java).apply {
+                            putExtra("callId", callId)
+                            putExtra("callerName", callerName)
+                            putExtra("profileUrl", callerProfileUrl)
+                        }
+                        startActivity(intent)
+                    }
+                }
+            }
+    }
+
+    private fun initiateCall(user: User) {
+        val currentUid = auth.currentUser?.uid ?: return
+        val callId = db.collection("calls").document().id
+        val callData = hashMapOf(
+            "callerId" to currentUid,
+            "receiverId" to user.uid,
+            "status" to "dialing",
+            "timestamp" to System.currentTimeMillis()
+        )
+        android.widget.Toast.makeText(this, "Starting call...", android.widget.Toast.LENGTH_SHORT).show()
+        db.collection("calls").document(callId).set(callData)
+            .addOnSuccessListener {
+                // Update last interaction timestamp to bring this user to top
+                user.friendshipDocId?.let { docId ->
+                    db.collection("friendships").document(docId)
+                        .update("lastInteraction", System.currentTimeMillis())
+                }
+
+                val intent = Intent(this, CallActivity::class.java).apply {
+                    putExtra("callId", callId)
+                    putExtra("targetName", user.name)
+                    putExtra("profileUrl", user.profileUrl)
+                    putExtra("isCaller", true)
+                }
+                startActivity(intent)
+            }
+            .addOnFailureListener { e ->
+                android.widget.Toast.makeText(this, "Failed to call: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            }
+    }
+
     private fun openAboutDeveloper() {
         val intent = Intent(this, AboutTheDevloperActivity::class.java)
         startActivity(intent)

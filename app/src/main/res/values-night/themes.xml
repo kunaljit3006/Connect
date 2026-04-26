@@ -2,10 +2,22 @@
 
     <style name="Theme.Connect" parent="Theme.Material3.DayNight.NoActionBar">
 
-        <!-- Material surface colors (dark) -->
-        <item name="colorSurface">#121212</item>
-        <item name="colorOnSurface">#FFFFFF</item>
-        <item name="colorOutline">#2C2C2C</item>
+        <!-- Primary (yellow toolbar / buttons) -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+
+        <!-- Secondary (content background) -->
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+
+        <!-- Surface (cards, inputs, drawers) -->
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        <item name="colorSurfaceVariant">@color/colorSurfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/colorOnSurfaceVariant</item>
+
+        <!-- Outline -->
+        <item name="colorOutline">@color/colorOutline</item>
 
         <!-- System bars -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -21,6 +33,9 @@
         <!-- Remove action bar -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <!-- Custom dialog theme for black text in light mode -->
+        <item name="materialAlertDialogTheme">@style/Theme.Connect.AlertDialog</item>
 
     </style>
 
