@@ -9,9 +9,9 @@
 ### 🔐 Authentication
 
 <p align="center">
-  <img src="screenshots/signin.png" width="30%" />
-  <img src="screenshots/signup.png" width="30%" />
-  <img src="screenshots/forgot_password.png" width="30%" />
+  <img src="signin.jpeg" width="30%" />
+  <img src="signup.jpeg" width="30%" />
+  <img src="forgot_password.jpeg" width="30%" />
 </p>
 
 - Secure Firebase authentication  
@@ -24,8 +24,8 @@
 ### 🏠 Main Interface
 
 <p align="center">
-  <img src="screenshots/drawer.png" width="30%" />
-  <img src="screenshots/profile.png" width="30%" />
+  <img src="drawer.jpeg" width="30%" />
+  <img src="profile.jpeg" width="30%" />
 </p>
 
 - Real-time user status (Online/Offline)  
@@ -50,7 +50,7 @@
 
 <p align="center">
   <img src="report_light.jpeg" width="30%" />
-  <img src="about_dark.jpeg" width="30%" />
+  <img src="about_dark..jpeg" width="30%" />
 </p>
 
 - Bug reporting system  
